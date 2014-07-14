@@ -2,9 +2,9 @@
 
 The data was collected by an anonymous individual wearing a personal activity monitoring device for two months
 (from 2012-10-01 to 2012-11-30). 
-The number of step was recorded in 5 minute intervals throughout the days.
+The number of steps was recorded in 5-minutes intervals throughout these days.
 
-First, make sure that all code chunks are visible:
+First, we make sure that all code chunks are visible:
 
 ```r
 opts_chunk$set(echo=TRUE)
@@ -183,6 +183,7 @@ The total steps per day are displayed as a histogram.
 The mean value of the total number of steps taken per day (1.0766 &times; 10<sup>4</sup>) is highlighted by a vertical red line, 
 the median (1.0766 &times; 10<sup>4</sup>) by a vertical blue line.
 The mean and the median overlap, and the peak of days with no recorded steps is gone.
+Both values have increased compared to the original data set. The effect on the mean, however, is much stronger.
 
 ```r
 hist(total_impsteps, breaks=11, 
@@ -216,33 +217,27 @@ sum(impute$steps)
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
+In order to identify differences between weekdays and weekends a daily acitity pattern is generated for both types of days.
+First the data is classified as recorded either on a weekday or on a weekend, and this information is stored in `week`.
+Using the `ggplot` function a panel plot contrasting the weekday and weekend activity is produced.
+
 
 ```r
 week <- factor(weekdays(impute$date) %in% c("Saturday","Sunday"), 
                labels=c("weekday","weekend"), ordered=FALSE)
-#impute <- data.frame(impute, week=week)
+
 impsteps <- aggregate(impute$steps, by=list(interval=impute$interval, weekday=week), mean)
-str(impsteps)
-```
 
-```
-## 'data.frame':	576 obs. of  3 variables:
-##  $ interval: num  0 5 10 15 20 25 30 35 40 45 ...
-##  $ weekday : Factor w/ 2 levels "weekday","weekend": 1 1 1 1 1 1 1 1 1 1 ...
-##  $ x       : num  2.251 0.445 0.173 0.198 0.099 ...
-```
-
-```r
 library(ggplot2)
 g <- ggplot(impsteps, aes(interval/60, x))
 g + geom_line() + facet_grid(weekday ~ .) +
-#    scale_x_datetime(breaks = date_breaks("2 hour"),labels=date_format("%H:%M")) +
     scale_x_continuous(breaks=0:6*4, labels=paste(0:6*4,":00", sep="")) +
     theme_bw() +
     labs(y="average number of steps in 5-min interval") +
-    labs(x="time of day") +
+    labs(x="time of day (h)") +
     labs(title="Daily activity pattern")
 ```
 
 ![plot of chunk weekends](figure/weekends.png) 
 
+Whereas peak activity is highest during weekdays, the overall activity is higher on weekends.
