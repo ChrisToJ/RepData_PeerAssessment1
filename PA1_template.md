@@ -136,8 +136,9 @@ sum(is.na(data))
 ## [1] 2304
 ```
 
-The daily activity pattern can be used to impute these missing values. For every missing value the average number of steps in
-that 5-minutes interval is used and a new data frame `impute` is created
+The daily activity pattern can be used to impute these missing values. For every missing value in the orignial data set 
+the average number of steps in that 5-minutes interval is used and a new data frame `impute` is created. 
+Instead of missing values this data set now contains a typical value of that 5-minutes interval.
 
 ```r
 impute <- transform(data, steps=ifelse(is.na(steps), avg_steps, steps))
@@ -155,7 +156,8 @@ summary(impute)
 ##  Max.   :806.0   Max.   :2012-11-30   Max.   :1435
 ```
 
-The total steps per day are summed up using the `tapply` function, and the mean and median are determined.
+Now using the data set with imputed values, the total steps per day are again summed up using the `tapply` function, 
+and the mean and median are determined.
 
 ```r
 total_impsteps <- tapply(impute$steps, impute$date, sum, na.rm=T)
@@ -180,7 +182,7 @@ impstep_median
 The total steps per day are displayed as a histogram.
 The mean value of the total number of steps taken per day (1.0766 &times; 10<sup>4</sup>) is highlighted by a vertical red line, 
 the median (1.0766 &times; 10<sup>4</sup>) by a vertical blue line.
-The mean and the median overlap.
+The mean and the median overlap, and the peak of days with no recorded steps is gone.
 
 ```r
 hist(total_impsteps, breaks=11, 
@@ -194,4 +196,53 @@ legend(x="topright", legend=c("mean","median"), col=c("red","blue"), bty="n", lw
 
 ![plot of chunk imphistogram](figure/imphistogram.png) 
 
+Due to imputation the total sum of steps in these two month increases from 570608 to 6.5674 &times; 10<sup>5</sup>.
+
+```r
+sum(data$steps, na.rm=TRUE)
+```
+
+```
+## [1] 570608
+```
+
+```r
+sum(impute$steps)
+```
+
+```
+## [1] 656738
+```
+
+
 ## Are there differences in activity patterns between weekdays and weekends?
+
+```r
+week <- factor(weekdays(impute$date) %in% c("Saturday","Sunday"), 
+               labels=c("weekday","weekend"), ordered=FALSE)
+#impute <- data.frame(impute, week=week)
+impsteps <- aggregate(impute$steps, by=list(interval=impute$interval, weekday=week), mean)
+str(impsteps)
+```
+
+```
+## 'data.frame':	576 obs. of  3 variables:
+##  $ interval: num  0 5 10 15 20 25 30 35 40 45 ...
+##  $ weekday : Factor w/ 2 levels "weekday","weekend": 1 1 1 1 1 1 1 1 1 1 ...
+##  $ x       : num  2.251 0.445 0.173 0.198 0.099 ...
+```
+
+```r
+library(ggplot2)
+g <- ggplot(impsteps, aes(interval/60, x))
+g + geom_line() + facet_grid(weekday ~ .) +
+#    scale_x_datetime(breaks = date_breaks("2 hour"),labels=date_format("%H:%M")) +
+    scale_x_continuous(breaks=0:6*4, labels=paste(0:6*4,":00", sep="")) +
+    theme_bw() +
+    labs(y="average number of steps in 5-min interval") +
+    labs(x="time of day") +
+    labs(title="Daily activity pattern")
+```
+
+![plot of chunk weekends](figure/weekends.png) 
+
