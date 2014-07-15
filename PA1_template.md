@@ -1,8 +1,7 @@
 # Reproducible Research: Peer Assessment 1
 
-The data was collected by an anonymous individual wearing a personal activity monitoring device for two months
-(from 2012-10-01 to 2012-11-30). 
-The number of steps was recorded in 5-minutes intervals throughout these days.
+The activity data was collected by an anonymous individual wearing a personal activity monitoring device 
+for two months (from 2012-10-01 to 2012-11-30) and the number of steps was recorded in 5-minutes intervals.
 
 First, we make sure that all code chunks are visible:
 
@@ -138,6 +137,7 @@ sum(is.na(data))
 
 The daily activity pattern can be used to impute these missing values. For every missing value in the orignial data set 
 the average number of steps in that 5-minutes interval is used and a new data frame `impute` is created. 
+This procedure should be valid if the person has daily routine, i.e. an activity pattern that is similar over multiple days.
 Instead of missing values this data set now contains a typical value of that 5-minutes interval.
 
 ```r
@@ -156,7 +156,7 @@ summary(impute)
 ##  Max.   :806.0   Max.   :2012-11-30   Max.   :1435
 ```
 
-Now using the data set with imputed values, the total steps per day are again summed up using the `tapply` function, 
+Now, using the data set with imputed values, the total steps per day are again summed up using the `tapply` function, 
 and the mean and median are determined.
 
 ```r
@@ -183,7 +183,7 @@ The total steps per day are displayed as a histogram.
 The mean value of the total number of steps taken per day (1.0766 &times; 10<sup>4</sup>) is highlighted by a vertical red line, 
 the median (1.0766 &times; 10<sup>4</sup>) by a vertical blue line.
 The mean and the median overlap, and the peak of days with no recorded steps is gone.
-Both values have increased compared to the original data set. The effect on the mean, however, is much stronger.
+Both values have increased compared to the original data set. The increase of the mean, however, is much stronger.
 
 ```r
 hist(total_impsteps, breaks=11, 
@@ -219,6 +219,7 @@ sum(impute$steps)
 ## Are there differences in activity patterns between weekdays and weekends?
 In order to identify differences between weekdays and weekends a daily acitity pattern is generated for both types of days.
 First the data is classified as recorded either on a weekday or on a weekend, and this information is stored in `week`.
+Then the data is aggregated by 5-minutes interval and weekday/-end.
 Using the `ggplot` function a panel plot contrasting the weekday and weekend activity is produced.
 
 
@@ -240,4 +241,6 @@ g + geom_line() + facet_grid(weekday ~ .) +
 
 ![plot of chunk weekends](figure/weekends.png) 
 
-Whereas peak activity is highest during weekdays, the overall activity is higher on weekends.
+Whereas peak and morning activity is highest during weekdays, the overall activity is higher on weekends.
+In light of the differences between weekdays and weekends it might be a better imputation strategy to use 
+weekend interval averages for imputing weekend activity and weekday interval averages for imputing weekday activity.
